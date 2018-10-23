@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<action-record model="com.axelor.gst.db.Invoice"
+		name="action.chart.set.dates.this.last.month">
+		<field name="toDate" expr="eval:__datetime__" />
+	</action-record>
+
+	<action-method name="chart.from.date">
+		<call class="com.axelor.gst.web.InvoiceController" method="setFromDate" />
+	</action-method>
+	
+	<chart name="chart.unpaid.invoices.per.customer" title="Unpaid invoices per customer "
+		onInit="action.chart.set.dates.this.last.month,chart.from.date">
+		<search-fields>
+			<field name="fromDate" type="datetime" title="FromDate"
+				x-required="true" />
+			<field name="toDate" type="datetime" title="ToDate" x-required="true" />
+		</search-fields>
+		<dataset type="jpql">
+	    <![CDATA[
+		    SELECT
+		        COUNT(self.id) AS total,
+		        MONTH(self.invoiceDate) AS month,
+		        party.name as customer
+		    FROM
+		        Invoice self
+		    LEFT join
+		       self.party as party 
+		    WHERE
+		       DATE(self.invoiceDate) BETWEEN DATE(:fromDate) AND DATE(:toDate)
+		       AND self.status != 'paid'
+		    GROUP BY
+		    	party.name,
+		        MONTH(self.invoiceDate)
+		    ORDER BY
+		        month
+	    ]]>
+    	</dataset>
+		<category key="customer" />
+		<series key="total" type="bar" />
+	</chart>
+
+	<chart name="chart.paid.invoices.per.category.per.product" title="Paid invoices per category per product"
+		onInit="action.chart.set.dates.this.last.month,chart.from.date">
+		<search-fields>
+			<field name="fromDate" type="datetime" title="FromDate"
+				x-required="true" />
+			<field name="toDate" type="datetime" title="ToDate" x-required="true" />
+		</search-fields>
+		<dataset type="sql">
+	    <![CDATA[
+		    SELECT
+		        COUNT(gst_invoice.id) AS total,
+		        product_product.name AS product,
+		        product_product_category.name AS prodcate
+		    FROM
+		        gst_invoice
+		    LEFT join
+		       gst_invoice_invoice_item ON gst_invoice.id = gst_invoice_invoice_item.gst_invoice 
+		    LEFT join
+		       gst_invoice_line ON gst_invoice_invoice_item.invoice_item = gst_invoice_line.id 
+		    LEFT join
+		       product_product ON gst_invoice_line.product  = product_product.id 
+		    LEFT join
+		       product_product_category ON product_product.product_category  = product_product_category.id 
+		    WHERE
+		      DATE(gst_invoice.invoice_date) BETWEEN DATE(:fromDate) AND DATE(:toDate)
+		       AND gst_invoice.status = 'paid'
+		    GROUP BY
+		    	product_product_category.name,
+		    	product_product.name
+	    ]]>
+	    </dataset>
+		<category key="prodcate" type="text" />
+		<series key="total" groupBy="product" type="bar" />
+	</chart>
+
+	<chart name="chart.customer.per.state" title="Customer per state">
+		<dataset type="sql">
+	    <![CDATA[
+		     SELECT
+		        COUNT(party_party.id) AS total,
+		        party_party.name AS customer,
+		        party_state.name AS state
+		    FROM
+		         party_party
+		    LEFT join
+		       party_party_addresses ON party_party.id = party_party_addresses.party_party 
+		    LEFT join
+		        party_address ON party_party_addresses.addresses = party_address.id 
+		    LEFT join
+		       party_state ON party_address.state = party_state.id 
+		       WHERE party_party.customer='true'
+		    GROUP BY
+		    	party_party.name,
+		    	party_state.name
+	    ]]>
+	    </dataset>
+		<category key="state" />
+		<series key="total" type="pie" />
+	</chart>
+
+	<chart name="chart.invoice.per.status.bar" title="Total amount of invoice per status,Number of invoice per status">
+		<dataset type="sql">
+	    <![CDATA[
+		    SELECT
+		        COUNT(gst_invoice.id) AS total,
+		        SUM(gst_invoice.net_amount) AS amount,
+		        gst_invoice.status AS status
+		    FROM
+		        gst_invoice
+		    GROUP BY
+		    	gst_invoice.status
+	    ]]>
+	    </dataset>
+		<category key="status" />
+		<series key="total" type="line" groupBy="amount" />
+		<series key="amount" type="bar" />
+	</chart>
+
+	<chart name="chart.number.of.invoice.per.status.bar" title="Number of invoice per status">
+		<dataset type="sql">
+	    <![CDATA[
+		    SELECT
+		        COUNT(gst_invoice.id) AS total,
+		        gst_invoice.status AS status
+		    FROM
+		        gst_invoice
+		    GROUP BY
+		    	gst_invoice.status
+	    ]]>
+	    </dataset>
+		<category key="status" />
+		<series key="total" type="line" groupBy="status" />
+	</chart>
+
+	<!-- <action-method name="custom.ckeck.date"> <call class="com.axelor.gst.web.invoiceController" 
+		method="setCheckDate" /> </action-method> -->
+
+	<custom name="Older-invoices" title="Older invoices"
+		helpLink="action.chart.set.dates.this.last.month">
+		<dataset type="sql">
+	    <![CDATA[
+		  SELECT
+		        gst_invoice.id AS id,
+		        gst_invoice.status AS status,
+		        gst_invoice.net_amount AS netamount,
+		        company_company.name AS company,
+		        party_party.name AS party,
+		        party_contact.name AS partycontact        
+		    FROM
+		        gst_invoice
+		    LEFT join
+		       company_company ON gst_invoice.company = company_company.id
+		    LEFT join
+		        party_party ON gst_invoice.party = party_party.id 
+		    LEFT join
+		       party_party_contacts ON party_party.id = party_party_contacts.party_party 
+		    LEFT join
+		       party_contact ON party_party_contacts.contacts = party_contact.id
+		    WHERE
+		       gst_invoice.invoice_date >= CURRENT_DATE - INTERVAL '1 month' AND gst_invoice.status != 'paid' AND gst_invoice.status = 'validated'
+		   
+	    ]]>
+	    </dataset>
+		<template>
+	    <![CDATA[
+	    	<report-table data='data' columns='id,status,company,party,partycontact,netamount' ></report-table>
+	    ]]>
+	    </template>
+	</custom>
+</object-views>
+

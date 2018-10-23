@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<grid name="party-grid" title="Party" model="com.axelor.party.db.Party">
+		<field name="reference" />
+		<field name="name" />
+		<field name="type" />
+		<field name="customer" />
+		<field name="supplier" />
+		<field name="GSTIN" title="GSTIN" />
+		<field name="addresses.type" title="Addresses" />
+		<field name="contacts.name" title="Contacts" />
+	</grid>
+
+	<form name="party-form" title="Party" model="com.axelor.party.db.Party"
+		onSave="party.reference">
+		<panel title="Party" itemSpan="12" css="panel-red">
+			<field name="reference" />
+			<field name="name" colSpan="6" />
+			<field name="type" colSpan="6" />
+			<field name="customer" colSpan="6" />
+			<field name="supplier" colSpan="6" />
+			<field name="GSTIN" title="GSTIN" />
+		</panel>
+		<panel title="Contacts" css="panel-green">
+			<field name="addresses" widget="Editor" colSpan="12" />
+			<field name="contacts" widget="Editor" colSpan="12" />
+		</panel>
+	</form>
+
+	<cards name="party-cards" model="com.axelor.party.db.Party"
+		title="Party" orderBy="name">
+		<field name="name" />
+		<field name="type" />
+		<field name="addresses.type" />
+		<field name="addresses.line1" />
+		<field name="addresses.city" />
+		<field name="addresses.state" />
+		<field name="addresses.country" />
+		<field name="addresses.pincode" />
+		<hilite color="danger" if="type == 'individual'" />
+		<hilite color="success" if="type == 'company'" />
+		<template><![CDATA[	
+		<div class="span4 card-image">
+        	<img ng-if="!hasImage" src="img/user.png">
+        	<strong>{{name}}</strong>
+      	</div>
+      	<div class="span8">
+      			<br>  <strong>{{addresses.type}} :- {{addresses.line1}}</strong><br>
+      			{{addresses.city.name}}<br>{{addresses.state.name}} {{addresses.country.name}}-{{addresses.pincode}}<br>
+      	</div>
+  		]]></template>
+	</cards>
+
+	<selection name="party.type.selection">
+		<option value="individual">Individual</option>
+		<option value="company">Company </option>
+	</selection>
+
+	<!-- ACTION METHOD -->
+	<action-method name="party.reference">
+		<call class="com.axelor.gst.web.PartyController" method="refPartyGenrator" />
+	</action-method>
+
+</object-views>

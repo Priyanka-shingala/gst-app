@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+
+	<grid name="product-grid" title="Product" model="com.axelor.product.db.Product">
+		<toolbar>
+			<button name="CreateInvoice" onClick="com.axelor.gst.web.ProductController:invoiceBtn"
+				title="Create Invoice" />
+			<button name="PrintProduct"
+				onClick="com.axelor.gst.web.ProductController:productReport,action-report-product"
+				title="Print Product" />
+		</toolbar>
+
+		<field name="name" />
+		<field name="code" />
+		<field name="HSBN" title="HSBN" />
+		<field name="productCategory" title="Product Category" />
+		<field name="salePrice" />
+		<field name="costPrice" />
+		<field name="image" />
+		<field name="gstRate" title="GST Rate" />
+	</grid>
+
+	<form name="product-form" title="Product" model="com.axelor.product.db.Product">
+		<panel title="Product" itemSpan="12" css="panel-red">
+			<panel colSpan="6">
+				<field name="image" widget="Image" colSpan="6" />
+			</panel>
+			<panel colSpan="6">
+				<field name="name" colSpan="6" />
+				<field name="code" colSpan="6" />
+				<field name="HSBN" title="HSBN" colSpan="6" />
+			</panel>
+		</panel>
+		<panel title="Product Category" css="panel-yellow">
+			<field name="productCategory" widget="SuggestBox" onChange="product.gstrate"
+				title="Product Category" />
+			<field name="gstRate" title="GST Rate" />
+		</panel>
+		<panel title="price" css="panel-green">
+			<field name="salePrice" />
+			<field name="costPrice" />
+		</panel>
+	</form>
+
+	<cards name="product-cards" model="com.axelor.product.db.Product"
+		title="Product" orderBy="name">
+		<field name="name" />
+		<field name="productCategory" />
+		<field name="proImage" />
+		<field name="gstRate" />
+		<hilite color="danger" if="gstRate &lt; 5"/>
+		<hilite color="success" if="gstRate = 5"/>
+		<hilite color="info" if="gstRate &gt; 5"/>
+		<template><![CDATA[	
+		 <div class="span4 card-image">
+       		<img ng-src="{{$image(null, 'image')}}">
+        	<strong>{{name}}</strong>
+      	</div>
+      	<div class="span8">
+      		<strong>productCategory : {{productCategory.name}} </strong><br>
+      		gstRate : {{gstRate}}
+      	</div>
+  		]]></template>
+	</cards>
+	
+	<!-- ACTION RECORD -->
+	<action-record name="product.gstrate" model="com.axelor.product.db.Product">
+		<field name="gstRate" expr="eval: productCategory?.gstRate" />
+	</action-record>
+
+	<action-report name="action-report-product" design="product.rptdesign"
+		output="demo-${date}${time}" format="pdf">
+		<param name="productParameter" expr="eval: _param" />
+		<param name="AttachmentPath"
+			expr="call:com.axelor.gst.web.ProductController:addAttachmentPath()" />
+	</action-report>
+
+</object-views>

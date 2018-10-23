@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+
+	<grid name="invoiceLine-grid" title="InvoiceLine"
+		model="com.axelor.gst.db.InvoiceLine">
+		<field name="product" />
+		<field name="HSBN" title="HSBN" />
+		<field name="item" />
+		<field name="quantity" />
+		<field name="price" />
+		<field name="netAmount" />
+		<field name="gstRate" title="GST Rate" />
+		<field name="IGST" title="IGST" />
+		<field name="SGST" title="SGST" />
+		<field name="CGST" title="CGST" />
+		<field name="grossAmt" />
+	</grid>
+
+	<form name="invoiceLine-form" title="InvoiceeLine"
+		model="com.axelor.gst.db.InvoiceLine">
+		<panel title="Invoice Line" itemSpan="12" css="panel-blue">
+			<field name="product" onChange="invoice-line-gstrate" colSpan="6" />
+			<field name="HSBN" title="HSBN" colSpan="6" />
+			<field name="item" colSpan="6" />
+		</panel>
+		<panel>
+			<field name="quantity"
+				onChange="invoiceline-GST,invoiceline-gst-calc,invoiceline-grossAmt" />
+			<field name="price"
+				onChange="invoiceline-GST,invoiceline-gst-calc,invoiceline-grossAmt" />
+		</panel>
+		<panel title="Calculate GST" css="panel-yellow">
+			<field name="netAmount" colSpan="3" />
+			<field name="gstRate" title="GST Rate" colSpan="3" />
+			<field name="IGST" title="IGST" colSpan="3" />
+			<field name="SGST" title="SGST" colSpan="3" />
+			<field name="CGST" title="CGST" colSpan="3" />
+			<field name="grossAmt" />
+		</panel>
+	</form>
+
+	<!-- ACTION RECORD -->
+	<action-record name="invoice-line-gstrate" model="com.axelor.product.db.Product">
+		<field name="gstRate" expr="eval: product?.gstRate" />
+		<field name="item" expr="eval: product?.code+': '+product?.name" />
+		<field name="HSBN" expr="eval: product?.HSBN" />
+		<field name="price" expr="eval: product?.salePrice" />
+	</action-record>
+
+	<action-record name="invoiceline-GST" model="com.axelor.gst.db.InvoiceLine">
+		<field name="netAmount" expr="eval: quantity*price" />
+	</action-record>
+
+	<action-record name="invoiceline-gst-calc" model="com.axelor.gst.db.InvoiceLine">
+		<field name="IGST" expr="eval: netAmount*gstRate"
+			if="__parent__?.invoiceAddress.state != __parent__?.company.address.state" />
+		<field name="SGST" expr="eval: (netAmount*gstRate)/2"
+			if="__parent__?.invoiceAddress.state == __parent__?.company.address.state" />
+		<field name="CGST" expr="eval: (netAmount*gstRate)/2"
+			if="__parent__?.invoiceAddress.state == __parent__?.company.address.state" />
+	</action-record>
+
+	<action-record name="invoiceline-grossAmt" model="com.axelor.gst.db.InvoiceLine">
+		<field name="grossAmt" expr="eval: netAmount*(IGST+CGST)" />
+	</action-record>
+
+</object-views>

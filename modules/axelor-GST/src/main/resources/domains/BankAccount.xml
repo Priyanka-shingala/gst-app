@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain-models xmlns="http://axelor.com/xml/ns/domain-models"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/domain-models http://axelor.com/xml/ns/domain-models/domain-models_5.0.xsd">
+
+	<module name="company" package="com.axelor.company.db" />
+
+	<entity name="BankAccount" cachable="true">
+		<string name="bank" required="true" />
+		<string name="account_no" required="true" title="Account Number"/>
+		<string name="IFSC" required="true" />
+		<string name="type" selection="bank.account.type.selection"
+			default="current" />
+		<string name="address" multiline="true" />
+	</entity>
+	
+</domain-models> 

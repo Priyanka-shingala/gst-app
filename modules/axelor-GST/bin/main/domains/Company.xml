@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain-models xmlns="http://axelor.com/xml/ns/domain-models"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/domain-models http://axelor.com/xml/ns/domain-models/domain-models_5.0.xsd">
+
+	<module name="company" package="com.axelor.company.db" />
+
+	<entity name="Company" cachable="true">
+		<string name="name" required="true" />
+		<many-to-one name="logo" ref="com.axelor.meta.db.MetaFile" />
+		<one-to-many name="contacts" ref="com.axelor.party.db.Contact" />
+		<string name="GSTIN" max="15" min="15" title="GSTIN"/>
+		<one-to-many name="bank_details" ref="BankAccount" />
+		<many-to-one name="address" ref="com.axelor.party.db.Address"></many-to-one>
+	</entity>
+	
+</domain-models> 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<grid name="contact-grid" title="Contact" model="com.axelor.party.db.Contact">
+		<field name="name" />
+		<field name="type" />
+		<field name="primaryEmail" title="Primary Email" />
+		<field name="secondaryEmail" title="Secondary Email" />
+		<field name="primaryPhone" title="Primary Phone No" />
+		<field name="secondaryPhone" title="Secondary Phone No" />
+	</grid>
+
+	<form name="contact-form" title="Contact" model="com.axelor.party.db.Contact">
+		<panel title="Name" itemSpan="12" css="panel-green">
+			<field name="name" colSpan="6" />
+			<field name="type" onChange="feild.hide" colSpan="6" />
+		</panel>
+		<panel title="Contact" css="panel-yellow">
+			<field name="primaryEmail" title="Primary Email" />
+			<field name="secondaryEmail" title="Secondary Email" />
+			<field name="primaryPhone" title="Primary Phone No" />
+			<field name="secondaryPhone" title="Secondary Phone No" />
+		</panel>
+	</form>
+
+	<selection name="contact.type.selection">
+		<option value="primary">Primary</option>
+		<option value="secondary">Secondary</option>
+		<option value="other">Other</option>
+	</selection>
+
+	<!-- ACTION ATTRS -->
+	<action-attrs name="feild.hide">
+		<attribute for="primaryEmail" name="hidden" expr="type=='secondary'" />
+		<attribute for="primaryPhone" name="hidden" expr="type=='secondary'" />
+		<attribute for="secondaryEmail" name="hidden" expr="type=='primary'" />
+		<attribute for="secondaryPhone" name="hidden" expr="type=='primary'" />
+	</action-attrs>
+
+</object-views>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+
+	<grid name="invoice-grid" title="Invoice" model="com.axelor.gst.db.Invoice">
+		<field name="company.name" title="Company" />
+		<field name="reference" />
+		<field name="invoiceDate" title="Invoice Date" />
+		<field name="party.name" title="Party" />
+		<field name="partyContact" />
+		<field name="useInvoiceAddressAsShipping" />
+		<field name="netAmount" />
+		<field name="netIGST" />
+		<field name="netSGST" />
+		<field name="netCGST" />
+		<field name="grossAmt" />
+		<field name="invoiceItem" />
+		<field name="invoiceAddress.line1" title="Invoice Address" />
+		<field name="shippingAddress.line1" title="Shipping Address" />
+	</grid>
+
+	<form name="invoice-form" title="Invoice" model="com.axelor.gst.db.Invoice"
+		onSave="on-save-action" onNew="on-new-action">
+		<toolbar>
+			<button name="printInvoice" onClick="save,action-report-invoice"
+				title="Print Invoice" />
+		</toolbar>
+		<panel itemSpan="4">
+			<panel colSpan="8">
+				<field name="status" readonly="true" widget="nav-select"
+					colSpan="12" />
+			</panel>
+			<panel colSpan="4">
+				<button name="Validated" title="Validated"
+					onClick="validated-invoice-status,invoice-reference,save" colSpan="12"
+					hideIf="status=='validated' || status=='paid' || status=='cancelled' " />
+				<button name="Paid" title="Paid" onClick="paid-invoice-status,save"
+					colSpan="12" hideIf="status=='paid' || status=='draft' || status=='cancelled'" />
+				<button name="Cancelled" title="Cancelled"
+					onClick="cancelled-invoice-status,save" colSpan="12"
+					hideIf="status=='cancelled' || status=='draft' || status=='validated'" />
+			</panel>
+		</panel>
+		<panel title="Invoice" itemSpan="12" css="panel-red">
+			<field name="reference" />
+			<field name="company" colSpan="3" />
+			<field name="invoiceDate" title="Invoice Date" colSpan="3" />
+			<field name="party" onChange="useInvoiceAddressAsShipping"
+				colSpan="3" />
+			<field name="partyContact" colSpan="3" />
+		</panel>
+		<panel title="Addresses" css="panel-yellow" sidebar="true">
+			<field name="invoiceAddress" title="Invoice Address" colSpan="12"
+				canEdit="true">
+				<viewer><![CDATA[
+        			<address>
+        			{{record.type}} {{record.line1}}<br>
+        			{{record.city.name}}, {{record.state.name}} - {{record.pincode}}<br>
+  					{{record.country.name}}
+        			</address>
+       				]]>
+        		</viewer>
+				<editor x-show-titles="false">
+					<field name="type" colSpan="5" />
+					<field name="line1" colSpan="5" />
+					<field name="line2" colSpan="5" />
+					<field name="city" canNew="true" colSpan="5" />
+					<field name="state" canNew="true" colSpan="5" />
+					<field name="country" canNew="true" colSpan="5" />
+					<field name="pincode" colSpan="5" />
+				</editor>
+			</field>
+			<field name="useInvoiceAddressAsShipping" colSpan="12"
+				onChange="invoice-party-shipping-invoice-address" />
+			<field name="shippingAddress" title="Shipping Address" colSpan="12"
+				hideIf="useInvoiceAddressAsShipping" canEdit="true">
+				<viewer><![CDATA[
+        			<address>
+        			{{record.type}} {{record.line1}}<br>
+        			{{record.city.name}}, {{record.state.name}} - {{record.pincode}}<br>
+  					{{record.country.name}}
+        			</address>
+       				]]>
+        		</viewer>
+				<editor x-show-titles="false">
+					<field name="type" colSpan="5" />
+					<field name="line1" colSpan="5" />
+					<field name="line2" colSpan="5" />
+					<field name="city" canNew="true" colSpan="5" />
+					<field name="state" canNew="true" colSpan="5" />
+					<field name="country" canNew="true" colSpan="5" />
+					<field name="pincode" colSpan="5" />
+				</editor>
+			</field>
+		</panel>
+		<panel title="Calculate GST" css="panel-brown">
+			<field name="netAmount" colSpan="2" />
+			<field name="netIGST" colSpan="2" />
+			<field name="netSGST" colSpan="2" />
+			<field name="netCGST" colSpan="2" />
+			<field name="grossAmt" colSpan="2" />
+			<field name="invoiceItem" widget="Editor" colSpan="12"
+				onChange="invoice-net-calculate" />
+		</panel>
+	</form>
+
+	<kanban name="invoice-kanban" sequenceBy="priority"
+		model="com.axelor.gst.db.Invoice" columnBy="status" title="Invoice">
+		<field name="company" />
+		<field name="party" />
+		<field name="priority" />
+		<hilite color="danger" if="status == 'draft'"/>
+		<hilite color="success" if="status == 'validated'"/>
+		<hilite color="info" if="status == 'paid'"/>
+		<hilite color="warning" if="status == 'cancelled'"/>
+		<template><![CDATA[
+      			<strong>company : {{company.name}}</strong><br>
+      			<strong>party : {{party.name}}</strong>
+  		]]></template>
+	</kanban>
+
+	<selection name="invoice.type.selection">
+		<option value="draft">Draft</option>
+		<option value="validated">Validated</option>
+		<option value="paid">Paid</option>
+		<option value="cancelled">Cancelled</option>
+	</selection>
+
+	<!-- ACTION METHOD -->
+	<action-method name="invoice-party-shipping-invoice-address">
+		<call class="com.axelor.gst.web.InvoiceController" method="partyAddresses" />
+	</action-method>
+
+	<action-method name="invoice-net-calculate">
+		<call class="com.axelor.gst.web.InvoiceController" method="netCalculator" />
+	</action-method>
+
+	<action-method name="validated-invoice-status">
+		<call class="com.axelor.gst.web.InvoiceController" method="setStatusValidate" />
+	</action-method>
+
+	<action-method name="paid-invoice-status">
+		<call class="com.axelor.gst.web.InvoiceController" method="setStatusPaid" />
+	</action-method>
+
+	<action-method name="cancelled-invoice-status">
+		<call class="com.axelor.gst.web.InvoiceController" method="setStatusCancelled" />
+	</action-method>
+
+	<action-method name="invoice-reference">
+		<call class="com.axelor.gst.web.InvoiceController" method="refGenrator" />
+	</action-method>
+
+	<action-method name="party-address">
+		<call class="com.axelor.gst.web.InvoiceController" method="partyAddressSave(invoiceAddress,party)" />
+	</action-method>
+
+	<!-- ACTION RECORD -->
+	<action-record name="invoice-date" model="com.axelor.gst.db.Invoice">
+		<field name="invoiceDate" expr="eval: __datetime__" />
+	</action-record>
+
+	<action-record name="default-invoice-status" model="com.axelor.gst.db.Invoice">
+		<field name="status" expr="draft" />
+	</action-record>
+
+	<action-record name="add-shipping-address" model="com.axelor.gst.db.Invoice">
+		<field name="shippingAddress"
+			expr="call: com.axelor.gst.web.InvoiceController:addShippingAddress(invoiceAddress,shippingAddress)"
+			if="useInvoiceAddressAsShipping" />
+	</action-record>
+
+	<action-record name="invoice-default-company" model="com.axelor.gst.db.Invoice">
+		<field name="company"
+			expr="call: com.axelor.gst.web.InvoiceController:defaultComapany()" />
+	</action-record>
+
+	<!-- ACTION ATTRS -->
+	<action-attrs name="invoice.product">
+		<attribute name="value" for="invoiceItem" expr="eval:_invoiceItem"
+			if="_invoiceItem" />
+	</action-attrs>
+
+	<action-attrs name="hide-print-button">
+		<attribute for="printInvoice" name="hidden" expr="!save" />
+	</action-attrs>
+
+	<action-attrs name="unhide-print-button">
+		<attribute for="printInvoice" name="hidden" expr="save" />
+	</action-attrs>
+
+	<!-- ACTION GROUP -->
+	<action-group name="on-save-action">
+		<action name="unhide-print-button" />
+		<action name="party-address" />
+		<action name="add-shipping-address" />
+	</action-group>
+
+	<action-group name="on-new-action">
+		<action name="invoice-date" />
+		<action name="default-invoice-status" />
+		<action name="invoice.product" />
+		<action name="hide-print-button" />
+		<action name="invoice-default-company" />
+	</action-group>
+
+	<!-- ACTION REPORT -->
+	<action-report name="action-report-invoice" design="invoice.rptdesign"
+		output="demo-${date}${time}" format="pdf">
+		<param name="invoiceParameter" expr="eval: id" />
+		<param name="AttachmentPath"
+			expr="call:com.axelor.gst.web.InvoiceController:addAttachmentPath()" />
+	</action-report>
+
+</object-views>

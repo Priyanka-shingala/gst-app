@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain-models xmlns="http://axelor.com/xml/ns/domain-models"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/domain-models http://axelor.com/xml/ns/domain-models/domain-models_5.0.xsd">
+
+	<module name="company" package="com.axelor.company.db" />
+
+	<entity name="Sequence" cachable="true">
+		<string name="prefix" required="true" />
+		<string name="suffix" />
+		<integer name="padding" max="10" min="1" />
+		<string name="nextNumber" />
+		<many-to-one name="model" ref="com.axelor.meta.db.MetaModel" />
+	</entity>
+	
+</domain-models> 

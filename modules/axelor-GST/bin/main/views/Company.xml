@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+	<grid name="company-grid" title="Company" model="com.axelor.company.db.Company">
+		<field name="name" />
+		<field name="logo" />
+		<field name="contacts.name" title="Contact" />
+		<field name="GSTIN" />
+		<field name="bank_details.bank" title="Bank Details" />
+		<field name="address.line1" title="Address" />
+	</grid>
+
+	<form name="company-form" title="Company" model="com.axelor.company.db.Company">
+		<panel title="Company" itemSpan="12" css="panel-yellow">
+			<panel colSpan="6">
+				<field name="logo" widget="Image" />
+			</panel>
+			<panel colSpan="6">
+				<field name="name" colSpan="12" />
+				<field name="GSTIN" colSpan="12" />
+			</panel>
+		</panel>
+		<panel title="Details" css="panel-green">
+			<field name="bank_details" colSpan="12" title="Bank Details" />
+		</panel>
+		<panel title="Contact" css="panel-pink">
+			<panel colSpan="12">
+				<field name="contacts" widget="Editor" colSpan="12" />
+			</panel>
+			<panel colSpan="12">
+				<field name="address" title="Address" readonly="false"
+					colSpan="8">
+					<viewer><![CDATA[
+        			<address>
+        			{{record.type}} {{record.line1}}<br>
+        			{{record.city.name}}, {{record.state.name}} - {{record.pincode}}<br>
+  					{{record.country.name}}
+        			</address>
+       				]]>
+        		</viewer>
+					<editor x-show-titles="false">
+						<field name="type" colSpan="5" />
+						<field name="line1" colSpan="5" />
+						<field name="line2" colSpan="5" />
+						<field name="city" canNew="true" colSpan="5" />
+						<field name="state" canNew="true" colSpan="5" />
+						<field name="country" canNew="true" colSpan="5" />
+						<field name="pincode" colSpan="5" />
+					</editor>
+				</field>
+			</panel>
+		</panel>
+	</form>
+
+</object-views>

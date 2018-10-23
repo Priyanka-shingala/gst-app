@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<object-views xmlns="http://axelor.com/xml/ns/object-views"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://axelor.com/xml/ns/object-views http://axelor.com/xml/ns/object-views/object-views_5.0.xsd">
+
+
+	<grid name="sequence-grid" title="Sequence" model="com.axelor.company.db.Sequence">
+		<field name="prefix" title="Prefix" />
+		<field name="suffix" title="Suffix" />
+		<field name="padding" title="Padding" />
+		<field name="nextNumber" title="Next Number" />
+		<field name="model" title="Model" />
+	</grid>
+
+	<form name="sequence-form" title="Sequence" model="com.axelor.company.db.Sequence"
+		onSave="sequence.next.no">
+		<panel title="Sequence" itemSpan="12" css="panel-brown">
+			<field name="prefix" title="Prefix" colSpan="6" />
+			<field name="suffix" title="Suffix" colSpan="6" />
+			<field name="padding" title="Padding" colSpan="6" />
+			<field name="model" title="Model" colSpan="6" />
+		</panel>
+		<panel>
+			<field name="nextNumber" title="Next Number" />
+		</panel>
+	</form>
+
+	<!-- ACTION METHOD -->
+	<action-method name="sequence.next.no">
+		<call class="com.axelor.gst.web.SequenceController" method="nextNoGenerator" />
+	</action-method>
+
+</object-views>
